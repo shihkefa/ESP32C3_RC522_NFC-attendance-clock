@@ -23,8 +23,14 @@ NFC-attendance-clock
 * 四顆打卡模式按鈕
 * ESP32-C3 開發板上的 RGB LED
 * 5V USB 電源
+ESP32C3跟其他模塊的連接方式如下圖
+![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/ScreenShot_2026-08-21_153059_940.png?raw=true)
 
 一開始我曾考慮加入 OLED 螢幕與有線網路，但考量成本、接線數量與實際需求，最後取消螢幕並改用 Wi-Fi。設備狀態直接透過燈號與蜂鳴器提示，詳細資料則在手機或電腦的管理網頁查看。
+
+
+把硬體接好線後尋找合適的外殼裝入，並且可透過Web ESPhome刷入這個分享的bin
+
 
 ## 四種打卡模式
 
