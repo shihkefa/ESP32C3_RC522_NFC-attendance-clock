@@ -1,7 +1,3 @@
-# ESP32C3_RC522_NFC-attendance-clock
-NFC-attendance-clock
-
-
 # 從零開始 DIY 一台具備 Web 管理介面的 NFC 打卡鐘
 
 公司原本需要一套簡單的上下班打卡設備，但市面上的商用打卡鐘除了價格不低，後續管理方式、資料格式與功能通常也不容易自行調整。因此，我決定使用 ESP32、RC522 與 ESPHome，自己製作一台可以獨立運作的 NFC 打卡鐘。
@@ -21,7 +17,7 @@ NFC-attendance-clock
 * DS3231 備用時鐘模組
 * 3.3V 有源蜂鳴器
 * 四顆打卡模式按鈕
-* ESP32-C3 開發板上的 RGB LED
+* Type-C充電線一條，拿來供電
 * 5V USB 電源
 ESP32C3跟其他模塊的連接方式如下圖
 ![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/ScreenShot_2026-08-21_153059_940.png?raw=true)
@@ -29,9 +25,10 @@ ESP32C3跟其他模塊的連接方式如下圖
 一開始我曾考慮加入 OLED 螢幕與有線網路，但考量成本、接線數量與實際需求，最後取消螢幕並改用 Wi-Fi。設備狀態直接透過燈號與蜂鳴器提示，詳細資料則在手機或電腦的管理網頁查看。
 
 
-把硬體接好線後尋找合適的外殼裝入，並且可透過Web ESPhome刷入這個分享的bin
+把硬體接好線後尋找合適的外殼裝入，並且可透過Web ESPhome刷入這個分享的bin檔案後就可以使用
+[📥 下載 NFC 打卡鐘韌體 BIN 檔](./nfc-attendance-clock-firmware.factory_1327.bin?raw=true)
 
-
+產品介紹說明:
 ## 四種打卡模式
 
 一般打卡鐘通常只有上班與下班，但實際使用時還需要記錄加班，因此這台打卡鐘設計了四顆實體按鈕：
