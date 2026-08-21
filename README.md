@@ -99,9 +99,9 @@ ESP32C3跟其他模塊的連接方式如下圖
 
 ## 不依賴 Home Assistant 的 Web 管理介面
 
-雖然設備使用 ESPHome 開發寫的程式代碼，網路環境中有 Home Assistant 主機是會主動發現刷卡機設備並接入的，後續如果管理人員要做一些擴充自動化，例如異常時間段打卡就發Line通知，或是當天5點後第一個下班打卡打完卡後，自動把車道門開啟，這些都能做到，但就算使用環境沒有 Home Assistant 主機，日常使用打卡與管理功能並不依賴 HA 主機，可以正常使用。
+雖然設備使用 ESPHome 開發寫的程式代碼，網路環境中有 Home Assistant 主機是會主動發現刷卡機設備並接入的，後續如果管理人員要做一些擴充自動化，例如異常時間段打卡就發Line通知，或是如果門禁也有接入 Home Assistant 系統，也可以做到直接當作門禁機開門，但就算使用環境沒有 Home Assistant 主機，日常使用打卡與管理功能並不依賴 Home Assistant 主機，打卡機可以獨立正常使用。
 
-ESP32 本身提供完整的 Web 管理介面，管理員可以使用手機、平板或電腦完成以下操作：
+ESP32 刷好bin後本身提供完整的 Web 管理介面，管理員可以使用手機、平板或電腦完成以下操作：
 ![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/web1.png?raw=true?raw=true)
 ![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/2.png?raw=true?raw=true)
 ![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/3.png?raw=true?raw=true)
