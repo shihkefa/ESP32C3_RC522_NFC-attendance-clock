@@ -29,7 +29,7 @@
 ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 ![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/ScreenShot_2026-08-21_153059_940.png?raw=true)
 
-一開始我曾考慮加入 LED 螢幕與有線網路，但考量成本還有 ESP32 的GPIO接腳數量，最後取消螢幕並改用 Wi-Fi連接。
+一開始我曾考慮加入 LCD 螢幕與有線網路，但考量成本還有 ESP32 的GPIO接腳數量，最後取消螢幕並改用 Wi-Fi連接。
 
 設備狀態直接透過燈號與蜂鳴器提示，詳細資料則在手機或電腦的管理網頁查看。
 
