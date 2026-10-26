@@ -1,0 +1,10 @@
+7bc54e34c1e1b6291e03202921a0b71d5e1919d8bade05cc3b6016ba01b673c5  firmware/v1.3.34/attendance_partitions.csv
+128e1e631522ca544c29d6ed506612743433b4362ea8dc131ec814ce52007e02  firmware/v1.3.34/components/attendance_web/__init__.py
+d1e0db99f295baf33bbefbcb1d2ba8182afdd3ad7ac0e50d7d3fe32e99f5d294  firmware/v1.3.34/components/attendance_web/attendance_web.cpp
+99b3a0f4f593d1987d115d9f0d200f424cdc43a7040fe6763795d548735b6c26  firmware/v1.3.34/components/attendance_web/attendance_web.h
+dbf02bc18cdcea9f76ef7bf9ba67425be6f013bc351c9d70f5edde05f195aea7  firmware/v1.3.34/nfc-attendance-clock.yaml
+76a56f0f5ad07c6ece22710b5886e150b9e4983a184e5f8d2b0f82089f82c09f  firmware/v1.3.34/OTA更新說明.md
+8f5e2fbdeef040c03894d3b3fac2ce3e0531025ae393c4b308c2aa95314527cc  firmware/v1.3.34/README.md
+d352c9fa2e18b69bc4bf9d4a888755cf6ebcff5aac7f061cf17f487009527262  firmware/v1.3.34/secrets.example.yaml
+5c1dd5bb87185ffbe8ef42c7bec12c799085868482f1a5a27d25c8ee0398e63b  firmware/v1.3.34/驗證說明.md
+a61e61cf7ccf8f36698b7638eff91d4a73cfa6001fbcd34a59ca3f9898f0f6a8  releases/v1.3.34/nfc-attendance-clock-esphome-v1.3.34.zip

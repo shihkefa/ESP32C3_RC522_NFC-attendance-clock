@@ -1,0 +1,12 @@
+# Keep personal ESPHome credentials and generated files local.
+secrets.yaml
+secrets.*.yaml
+!secrets.example.yaml
+.esphome/
+.pio/
+.venv/
+build/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

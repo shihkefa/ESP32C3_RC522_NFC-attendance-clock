@@ -1,5 +1,48 @@
 # 從零開始 DIY 一台具備 Web 管理介面的 NFC 打卡鐘
 
+## 最新版本：四按鍵版 v1.3.34
+
+本版新增「管理員補打卡」，可補登上班、下班、加班上班與加班下班，並納入 Excel 工時與 JSON 備份。
+
+- [下載 v1.3.34 原始碼 ZIP](./releases/v1.3.34/nfc-attendance-clock-esphome-v1.3.34.zip?raw=true)
+- [瀏覽 v1.3.34 完整原始檔](./firmware/v1.3.34/)
+- [ESPHome 燒錄教學：檔案放哪裡、首次 USB、後續 OTA](./docs/ESPHOME_FLASHING.md)
+- [版本更新摘要](./CHANGELOG.md) · [原版 OTA 更新說明](./firmware/v1.3.34/OTA更新說明.md) · [原版驗證紀錄](./firmware/v1.3.34/驗證說明.md)
+
+v1.3.34 提供完整原始碼，請用自己的 Wi-Fi 與管理員密碼在 ESPHome 編譯；本次不提供通用 BIN。倉庫內的 `nfc-attendance-clock-firmware.factory_1329.bin` 是歷史 v1.3.29，並非 v1.3.34。
+
+### 透過 ESPHome 燒錄，要複製哪些檔案？
+
+將 ZIP 解壓後 `nfc-attendance-clock/` 裡的以下 **5 個程式檔**複製到 ESPHome 設定資料夾；若下載整個倉庫，來源是 `firmware/v1.3.34/`。
+
+| 必要程式檔 | 放置位置（相對於 ESPHome 設定資料夾） |
+| --- | --- |
+| `nfc-attendance-clock.yaml` | `nfc-attendance-clock.yaml` |
+| `attendance_partitions.csv` | `attendance_partitions.csv` |
+| `components/attendance_web/__init__.py` | `components/attendance_web/__init__.py` |
+| `components/attendance_web/attendance_web.h` | `components/attendance_web/attendance_web.h` |
+| `components/attendance_web/attendance_web.cpp` | `components/attendance_web/attendance_web.cpp` |
+
+另外，首次使用時將 `secrets.example.yaml` 複製為同層的 **`secrets.yaml`**，填入自己的 `wifi_ssid`、`wifi_password`、`attendance_web_password`。已經有 `secrets.yaml` 的人保留原檔，只補齊缺少的項目。
+
+```text
+ESPHome 設定資料夾/（Home Assistant 通常是 /config/esphome/）
+├── nfc-attendance-clock.yaml
+├── attendance_partitions.csv
+├── secrets.yaml
+└── components/
+    └── attendance_web/
+        ├── __init__.py
+        ├── attendance_web.h
+        └── attendance_web.cpp
+```
+
+新裝置：複製檔案 → 填寫密碼 → 在 ESPHome 驗證、編譯 → 下載 Factory 格式韌體 → 用 [ESPHome Web](https://web.esphome.io/) 透過 USB 燒錄。詳細操作與畫面選項請看[完整燒錄教學](./docs/ESPHOME_FLASHING.md)。
+
+升級前先匯出完整 JSON 備份。v1.3.31～v1.3.33 可透過 `Install → Wirelessly` 更新；v1.3.30 或更早版本需要 USB 更新分割表。**使用補打卡後，請勿降回 v1.3.33 或更早版本**，以免舊版寫入邏輯覆寫補登後的紀錄。
+
+---
+
 公司的傳統插紙卡的打卡鐘最近壞了，有在考慮買台新的，看了一下市面上現在的打卡鐘管理方式、資料格式與功能通常也不容易自行調整。用Line打卡的想法也有想過，但會有些員工不太願意分享手機定位權限的問題，因此我決定嘗試使用 ESP32 的模塊、RC522讀卡模塊 搭配 ESPHome 編輯軟體，自己製作一台可以獨立運作的 NFC 打卡鐘。
 
 最初的構想只是「刷卡後記錄時間」，後來發現我一開始想的太簡單了，實際需求還會有員工管理、上下班模式、加班打卡、Excel 匯出、請假登記、離線使用、資料備份及 Web 管理介面，最後完成了一套不依賴雲端伺服器或是 Home Assistant主機 也能獨立使用的出勤系統。
@@ -34,8 +77,9 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 設備狀態直接透過燈號與蜂鳴器提示，詳細資料則在手機或電腦的管理網頁查看。
 
 
-依照上圖把硬體接好線後尋找合適的外殼裝入，打開電腦透過Web ESPhome刷入下方分享的bin檔案後就可以使用
-[📥 下載 NFC 打卡鐘韌體 BIN 檔](./nfc-attendance-clock-firmware.factory_1329.bin?raw=true)
+依照上圖把硬體接好線後尋找合適的外殼裝入，再依照 [ESPHome 燒錄教學](./docs/ESPHOME_FLASHING.md) 編譯並安裝 v1.3.34。四按鍵版接線請以[原始碼接線說明](./firmware/v1.3.34/README.md#接線)及 YAML 為準：RC522 的 RST 接 3.3V，GPIO10 留給加班下班按鍵。
+
+歷史檔案：[v1.3.29 Factory BIN](./nfc-attendance-clock-firmware.factory_1329.bin?raw=true)。此檔僅保留舊版紀錄，不包含 v1.3.34 的補打卡功能，已使用新版補打卡的裝置請勿刷回。
 
 產品介紹說明:
 ## 四種打卡模式
@@ -58,7 +102,7 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 * 七彩燈：等待登記新卡
 * 橘燈閃爍：Wi-Fi 尚未連線
 
-系統每天凌晨 00:00 會自動切換為上班模式，下午 14:00 自動切換為下班模式。來提升使用者打卡時的正確率，管理員也可以透過 Web 管理介面遠端切換，不一定要走到打卡鐘旁邊按按鈕。
+系統預設每天凌晨 00:00 切換為上班模式、下午 14:00 切換為下班模式。v1.3.34 可在「系統設定 → 自動模式切換」分別啟用四種模式並設定時間，支援跨午夜排程；加班上班與加班下班排程預設關閉。管理員也可以透過 Web 管理介面遠端切換，不一定要走到打卡鐘旁邊按按鈕。
 
 ## 刷卡成功與失敗提示
 
@@ -76,13 +120,13 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 
 ## 第一次開機使用透過設備的 AP 模式進行WIFI配網連接
 
-打卡機設備第一次通電開機後，大概等待1分鐘，會自動出現名為 `NFC-Clock-Fallback` 的熱點 WIFI 。
+若已在 `secrets.yaml` 填好正確的 Wi-Fi，開機後會直接連線。若無法連上設定的網路，等待約一分鐘，會出現名為 `NFC-Clock-Fallback` 的備用熱點。
 
 使用者只要依照下列步驟設定：
 
 1. 將打卡鐘接上 5V USB 電源。
 2. 等待約一分鐘，直到橘燈持續閃爍。
-3. 使用手機或是帶有無線網卡的電腦、平板等設備，搜尋WIFI連接 `SSID:NFC-Clock-Fallback  密碼:12345678`。
+3. 使用手機或是帶有無線網卡的電腦、平板等設備，搜尋WIFI連接 `SSID:NFC-Clock-Fallback  密碼:change-me-1234`（v1.3.34 範例值；如已在 YAML 修改，請使用自己的熱點密碼）。
 4. 如果手機提示「這個 Wi-Fi 沒有網際網路」，選擇仍要連線或保持連線。
 5. 等待配網頁自動彈出。
 6. 如果沒有自動出現，使用瀏覽器開啟 `http://192.168.4.1/`。
@@ -93,7 +137,7 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 
 `http://nfc-attendance-clock.local/attendance/`
 
-預設登入 `帳號admin``密碼為12345678`。
+登入帳號為 `admin`，首次密碼是自己在 `secrets.yaml` 設定的 `attendance_web_password`；若曾在管理頁修改密碼，升級後繼續使用已保存的新密碼。
 如果部分路由器或電腦不支援 mDNS，也可以進公司的路由器管理介面找尋刷卡機取得的 IP 位址登入。
 `http://192.168.X.X/attendance/`
 
@@ -102,18 +146,19 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 雖然設備使用 ESPHome 開發寫的程式代碼，網路環境中有 Home Assistant 主機是會主動發現刷卡機設備並接入的，後續如果管理人員要做一些擴充自動化，例如異常時間段打卡就發Line通知，或是如果門禁也有接入 Home Assistant 系統，也可以做到直接當作門禁機開門，但就算使用環境沒有 Home Assistant 主機，日常使用打卡與管理功能並不依賴 Home Assistant 主機，打卡機可以獨立正常使用。
 
 ESP32 刷好bin後本身提供完整的 Web 管理介面，管理員可以使用手機、平板或電腦完成以下操作：
-![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/web1.png?raw=true?raw=true)
-![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/2.png?raw=true?raw=true)
-![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/3.png?raw=true?raw=true)
-![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/4.png?raw=true?raw=true)
-![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/5.png?raw=true?raw=true)
-![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/6.png?raw=true?raw=true)
+![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/web1.png?raw=true)
+![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/2.png?raw=true)
+![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/3.png?raw=true)
+![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/4.png?raw=true)
+![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/5.png?raw=true)
+![NFC 打卡鐘管理介面](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/pic/6.png?raw=true)
 * 查看設備目前時間
 * 查看 Wi-Fi 名稱、網路狀態及 IP 位址
 * 遠端切換四種打卡模式
 * 新增、修改及刪除員工
 * 登記員工感應卡
 * 搜尋刷卡紀錄
+* 管理員補打卡：選擇員工、日期時間與四種打卡類型，輸入管理員密碼後新增紀錄
 * 填寫每日請假或出勤備註
 * 下載近兩個月的 Excel 彙總表
 * 修改管理員密碼
@@ -121,7 +166,9 @@ ESP32 刷好bin後本身提供完整的 Web 管理介面，管理員可以使用
 * 匯出及匯入完整備份
 * 清除全部刷卡紀錄
 
-目前最多可管理100位員工及256筆每日請假備註登記內容。管理網頁會顯示最近100筆刷卡資料，而設備內保存最近兩個日曆月的完整打卡紀錄。
+目前最多可管理 100 位員工及 500 筆每日請假／出勤備註，每筆備註最多 15 個字。總覽顯示最近 10 筆刷卡資料，刷卡紀錄、員工與備註採每頁 20 筆。刷卡環形區容量為 25,856 筆，網頁及匯出提供目前日期往前兩個日曆月內的資料；若大量重複刷卡導致容量用滿，最舊紀錄仍會被循環覆蓋。
+
+管理員補打卡只接受上述兩個日曆月範圍內、且不晚於裝置目前時間的紀錄。補登會新增紀錄，不會取代原刷卡紀錄；Excel 沿用上班取最早、下班取最晚的彙總方式。
 
 ## Excel 出勤彙總
 
@@ -137,6 +184,8 @@ ESP32 刷好bin後本身提供完整的 Web 管理介面，管理員可以使用
 * 加班上班時間
 * 加班下班時間
 * 每日備註
+* 當日出勤工時
+* 當日加班工時
 
 除了全部員工的總表，每位員工也會建立獨立分頁，分頁名稱使用「工號_姓名」，方便管理員查詢、列印或交給會計進一步整理核算薪資。
 
