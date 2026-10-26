@@ -1,0 +1,92 @@
+{
+  "version": "1.3.34",
+  "profile": "public-usb-factory",
+  "source_commit": "22bc0dcbbabab30ff8c7b97f95589d465c7b642d",
+  "configuration": "firmware/v1.3.34/nfc-attendance-clock-public.yaml",
+  "configuration_sha256": "41fd1c5d7a3d692c45071a1bd7e21af7957f58bd0766a1929b0010cf39295279",
+  "esphome_version": "2026.8.1",
+  "esp_idf_version": "5.5.5",
+  "application_description_version": "2026.8.1",
+  "chip": "esp32c3",
+  "flash_size_bytes": 4194304,
+  "factory_file": "nfc-attendance-clock-firmware.factory_1334.bin",
+  "factory_size_bytes": 1374560,
+  "factory_sha256": "0094b065549e4050ec3c1d5abbe0588a2b951d75e839b04d1ff90ea20dd3be29",
+  "application_size_bytes": 1309024,
+  "application_partition_bytes": 1572864,
+  "application_sha256": "0cb3123feb0f04b8a4383685758f0f5600c842263db8628084a41625fbe52861",
+  "compiled_components_sha256": {
+    "attendance_partitions.csv": "7bc54e34c1e1b6291e03202921a0b71d5e1919d8bade05cc3b6016ba01b673c5",
+    "components/attendance_web/__init__.py": "128e1e631522ca544c29d6ed506612743433b4362ea8dc131ec814ce52007e02",
+    "components/attendance_web/attendance_web.h": "99b3a0f4f593d1987d115d9f0d200f424cdc43a7040fe6763795d548735b6c26",
+    "components/attendance_web/attendance_web.cpp": "d1e0db99f295baf33bbefbcb1d2ba8182afdd3ad7ac0e50d7d3fe32e99f5d294"
+  },
+  "partitions": [
+    {
+      "name": "nvs",
+      "type": 1,
+      "subtype": 2,
+      "offset": 36864,
+      "size": 20480,
+      "flags": 0
+    },
+    {
+      "name": "otadata",
+      "type": 1,
+      "subtype": 0,
+      "offset": 57344,
+      "size": 8192,
+      "flags": 0
+    },
+    {
+      "name": "app0",
+      "type": 0,
+      "subtype": 16,
+      "offset": 65536,
+      "size": 1572864,
+      "flags": 0
+    },
+    {
+      "name": "app1",
+      "type": 0,
+      "subtype": 17,
+      "offset": 1638400,
+      "size": 1572864,
+      "flags": 0
+    },
+    {
+      "name": "attendance",
+      "type": 1,
+      "subtype": 64,
+      "offset": 3211264,
+      "size": 860160,
+      "flags": 0
+    },
+    {
+      "name": "coredump",
+      "type": 1,
+      "subtype": 3,
+      "offset": 4071424,
+      "size": 65536,
+      "flags": 0
+    },
+    {
+      "name": "att_notes",
+      "type": 1,
+      "subtype": 65,
+      "offset": 4136960,
+      "size": 57344,
+      "flags": 0
+    }
+  ],
+  "checks": {
+    "configuration_validation": "passed",
+    "full_build": "passed",
+    "esptool_image_checksum_and_validation_hash": "passed",
+    "factory_segments_match_build_outputs": true,
+    "partition_table_matches_v1_3_34": true,
+    "original_attendance_components_unchanged": true,
+    "private_wifi_credentials_embedded": false,
+    "physical_device_tested": false
+  }
+}

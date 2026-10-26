@@ -32,10 +32,18 @@
 ## v1.3.29
 
 - 管理頁分成六個分頁，總覽最近 10 筆，各資料列表每頁 20 筆。
-- 倉庫原有 Factory BIN 及畫面保留作歷史資料；舊 BIN 不是 v1.3.34。
+- 原有 v1.3.29 Factory BIN 已由公開 v1.3.34 BIN 取代；舊版畫面與 Git 歷史仍保留。
 
-## 本次倉庫整理
+## 原始碼首次整理
 
 - 收錄原版 9 個檔案及原始 ZIP，內容逐檔一致；校驗碼見 [SHA256SUMS.txt](./releases/v1.3.34/SHA256SUMS.txt)。校驗碼中的路徑以倉庫根目錄為基準。
 - 新增 [ESPHome 複製檔案及燒錄教學](./docs/ESPHOME_FLASHING.md)，更新首頁版本、容量及初始密碼說明。
 - 本次只整理原始碼與文件，沒有變更打卡邏輯，也沒有重新編譯或進行實機測試。[原包驗證紀錄](./firmware/v1.3.34/驗證說明.md)記載 ESPHome 2026.8.1／ESP-IDF 5.5.5 編譯成功，並註明尚未完成實機刷卡、斷電及 OTA 測試。
+
+## v1.3.34 公開 Factory BIN
+
+- 新增 `nfc-attendance-clock-firmware.factory_1334.bin`，移除目前版本中的 `nfc-attendance-clock-firmware.factory_1329.bin` 並更新下載連結。
+- 使用 v1.3.34 的原始元件及分割表，新增不含私人 Wi-Fi 設定的 `nfc-attendance-clock-public.yaml`；裝置開機後可透過熱點配網。
+- 初始管理員密碼為 `change-me-1334`，登入後請修改；保留 NVS 的更新方式沿用已保存的密碼，Factory 完整安裝可能將它重設。
+- 公開 BIN 使用 ESPHome 2026.8.1／ESP-IDF 5.5.5 編譯，附上校驗碼及建置紀錄；尚未進行實機燒錄測試。
+- 原始碼 ZIP 及其中 9 個原版檔案保持原樣。原包內「不附通用 BIN」描述的是該原始包；現成公開 BIN、設定檔及教學另列於倉庫。

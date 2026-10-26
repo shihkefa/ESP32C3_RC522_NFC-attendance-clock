@@ -8,3 +8,5 @@ dbf02bc18cdcea9f76ef7bf9ba67425be6f013bc351c9d70f5edde05f195aea7  firmware/v1.3.
 d352c9fa2e18b69bc4bf9d4a888755cf6ebcff5aac7f061cf17f487009527262  firmware/v1.3.34/secrets.example.yaml
 5c1dd5bb87185ffbe8ef42c7bec12c799085868482f1a5a27d25c8ee0398e63b  firmware/v1.3.34/驗證說明.md
 a61e61cf7ccf8f36698b7638eff91d4a73cfa6001fbcd34a59ca3f9898f0f6a8  releases/v1.3.34/nfc-attendance-clock-esphome-v1.3.34.zip
+41fd1c5d7a3d692c45071a1bd7e21af7957f58bd0766a1929b0010cf39295279  firmware/v1.3.34/nfc-attendance-clock-public.yaml
+0094b065549e4050ec3c1d5abbe0588a2b951d75e839b04d1ff90ea20dd3be29  nfc-attendance-clock-firmware.factory_1334.bin

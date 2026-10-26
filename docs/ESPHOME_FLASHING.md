@@ -2,7 +2,19 @@
 
 適用於本專案的 ESP32-C3／4MB Flash／CH340 USB 開發板、RC522、DS3231 及四顆模式按鍵。其他板型請先核對接腳及 USB 方式；本 YAML 將 GPIO18／19 用於 DS3231，不能同時使用這兩腳的原生 USB Serial/JTAG。
 
-本版提供可編譯的原始碼，**沒有附上 v1.3.34 通用 BIN**。完整流程是「複製程式檔 → 設定自己的密碼 → ESPHome 編譯 → USB 或 OTA 安裝」。倉庫根目錄的 `nfc-attendance-clock-firmware.factory_1329.bin` 是舊版 v1.3.29。
+本版同時提供 **可直接 USB 燒錄的公開 Factory BIN** 與可自行編譯的原始碼。需要修改接腳、Wi-Fi 或初始密碼時，使用下方第 1～4 節的原始碼流程；使用現成 BIN 則依以下快速步驟。
+
+## 現成 BIN：不用複製原始檔，也不用先編譯
+
+1. 下載 [v1.3.34 Factory BIN](../nfc-attendance-clock-firmware.factory_1334.bin?raw=true)。
+2. 新空白裝置用資料 USB 線接上電腦，在 Chrome／Edge 開啟 [ESPHome Web](https://web.esphome.io/)。
+3. 按 `Connect` 選擇 CH340／USB Serial 埠，再按 `Install` 選擇下載的 BIN。
+4. 安裝後連上 `NFC-Clock-Fallback` 熱點，密碼 `change-me-1234`；開啟 `http://192.168.4.1/` 設定自己的 2.4 GHz Wi-Fi。
+5. 電腦或手機回到相同區域網路，開啟 `http://nfc-attendance-clock.local/attendance/`（或裝置 IP 加 `/attendance/`），帳號 `admin`，初始密碼 `change-me-1334`。登入後在管理頁修改密碼。
+
+公開 BIN 不內建私人 Wi-Fi 資料，也不需要使用者提供 `secrets.yaml`。已有員工及刷卡資料的裝置請先匯出 JSON 備份，依第 7 節升級；Factory 完整安裝可能重設配網及初始密碼；採保留 NVS 的更新方式才會沿用已保存的管理員密碼。由舊版改裝公開 BIN 可能需要重新配網。**這個 Factory BIN 只能用於 USB 完整安裝，不能作為 OTA 映像上傳。**
+
+公開 BIN 的來源設定與檢查結果見 [公開韌體說明](../releases/v1.3.34/PUBLIC_FIRMWARE.md)。以下章節保留自行編譯及既有裝置升級流程。
 
 ## 1. 下載原始碼，準備 ESPHome
 
@@ -10,7 +22,7 @@
 
 使用已安裝的 **ESPHome Device Builder**。Home Assistant 使用者可從應用程式／附加元件商店安裝並啟動 ESPHome Device Builder；沒有 Home Assistant 也能使用獨立的 ESPHome 環境。安裝方式請參考 [ESPHome 官方安裝說明](https://esphome.io/install/)。打卡鐘燒錄完成後可獨立運作。
 
-本版原始驗證紀錄使用 **ESPHome 2026.8.1、ESP-IDF 5.5.5**。這是原版已記錄的編譯環境，不代表每個後續 ESPHome 版本都已驗證；這次倉庫整理沒有重新編譯或進行實機燒錄。
+原始碼及本次公開 BIN 均使用 **ESPHome 2026.8.1、ESP-IDF 5.5.5** 編譯。公開 BIN 已完成編譯與映像檢查，尚未實機燒錄；不代表每個後續 ESPHome 版本都已驗證。
 
 ## 2. 到底要複製哪些檔案？
 

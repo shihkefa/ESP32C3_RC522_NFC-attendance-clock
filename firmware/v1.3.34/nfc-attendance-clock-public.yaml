@@ -1,0 +1,377 @@
+# Public USB Factory build for v1.3.34. No private secrets.yaml is needed.
+# AP: NFC-Clock-Fallback / change-me-1234
+# Initial admin login: admin / change-me-1334; change it after setup.
+substitutions:
+  device_name: nfc-attendance-clock
+  friendly_name: NFC 打卡鐘
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  project:
+    name: shihkefa.nfc_attendance_clock
+    version: "1.3.34"
+  on_boot:
+    # Read DS3231 after I2C/RTC setup but before waiting for Internet time.
+    - priority: 500
+      then:
+        - ds1307.read_time:
+            id: hardware_rtc
+    - priority: -100
+      then:
+        - if:
+            condition:
+              wifi.connected:
+            then:
+              - lambda: id(attendance).refresh_status_light();
+            else:
+              - script.execute: no_wifi_blink
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
+  partitions: attendance_partitions.csv
+  framework:
+    type: esp-idf
+
+external_components:
+  - source: {type: local, path: components}
+    components: [attendance_web]
+
+logger:
+  # This YD-ESP32-C3 board flashes through its CH340 on UART0. Moving logs to
+  # UART0 releases native USB-JTAG pins GPIO18/19 for the DS3231 I2C bus.
+  hardware_uart: UART0
+api:
+  reboot_timeout: 0s
+ota:
+  - platform: esphome
+wifi:
+  id: wifi_component
+  # No router credentials are embedded. Configure Wi-Fi through the captive portal.
+  reboot_timeout: 0s
+  ap: {ssid: "NFC-Clock-Fallback", password: "change-me-1234"}
+  on_connect:
+    then:
+      - script.stop: no_wifi_blink
+      - lambda: id(attendance).refresh_status_light();
+      - script.execute: fast_sntp_sync
+  on_disconnect:
+    then:
+      - script.execute: no_wifi_blink
+captive_portal:
+
+mdns:
+  disabled: false
+
+web_server:
+  port: 80
+  version: 3
+  auth:
+    username: admin
+    password: "change-me-1334"
+
+i2c:
+  sda: GPIO18
+  scl: GPIO19
+  scan: true
+  frequency: 100kHz
+
+time:
+  # ESPHome's DS1307 driver is register-compatible with the DS3231 clock module.
+  # It is read explicitly at boot; repeated reads are unnecessary.
+  - platform: ds1307
+    id: hardware_rtc
+    timezone: Asia/Taipei
+    update_interval: never
+
+  - platform: sntp
+    id: network_time
+    timezone: Asia/Taipei
+    # ESPHome accepts at most three NTP servers. Use the China pool first, then
+    # Taiwan and Singapore regional pools as nearby fallback sources.
+    servers:
+      - 0.cn.pool.ntp.org
+      - 0.tw.pool.ntp.org
+      - 0.sg.pool.ntp.org
+    # Wi-Fi connection triggers an immediate synchronization below. Once time
+    # is valid, an hourly correction is sufficient and avoids excessive events.
+    update_interval: 1h
+    on_time_sync:
+      then:
+        - if:
+            condition:
+              lambda: return id(attendance).network_time_write_allowed();
+            then:
+              - lambda: id(attendance).mark_network_time_synced("SNTP 網路校時");
+              - if:
+                  condition:
+                    lambda: return id(attendance).hardware_rtc_is_connected();
+                  then:
+                    - ds1307.write_time:
+                        id: hardware_rtc
+
+spi:
+  clk_pin: GPIO4
+  miso_pin: GPIO5
+  mosi_pin: GPIO6
+
+output:
+  - platform: gpio
+    pin: GPIO3
+    id: buzzer_output
+
+light:
+  - platform: esp32_rmt_led_strip
+    id: status_rgb
+    name: "狀態燈 STATUS_RGB"
+    internal: true
+    restore_mode: ALWAYS_OFF
+    pin: GPIO8
+    num_leds: 1
+    rgb_order: GRB
+    chipset: WS2812
+
+attendance_web:
+  id: attendance
+  time_id: network_time
+  hardware_rtc_id: hardware_rtc
+  status_light_id: status_rgb
+  wifi_id: wifi_component
+  admin_password: "change-me-1334"
+
+globals:
+  - id: last_card_registered
+    type: bool
+    restore_value: no
+    initial_value: "false"
+
+script:
+  # ESP-IDF starts SNTP before Wi-Fi is ready. Restarting it as soon as Wi-Fi
+  # receives an IP sends the first request immediately. If no valid time is
+  # received, retry at 10 and 30 seconds; successful syncs skip later retries.
+  - id: fast_sntp_sync
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: return id(attendance).network_time_write_allowed();
+          then:
+            - lambda: id(attendance).restart_network_time_sync();
+            - delay: 10s
+            - if:
+                condition:
+                  lambda: return !id(network_time).now().is_valid();
+                then:
+                  - lambda: id(attendance).restart_network_time_sync();
+            - delay: 20s
+            - if:
+                condition:
+                  lambda: return !id(network_time).now().is_valid();
+                then:
+                  - lambda: id(attendance).restart_network_time_sync();
+
+  - id: no_wifi_blink
+    mode: restart
+    then:
+      - while:
+          condition:
+            not:
+              wifi.connected:
+          then:
+            - light.turn_on:
+                id: status_rgb
+                brightness: 65%
+                red: 100%
+                green: 45%
+                blue: 0%
+                transition_length: 0s
+            - delay: 500ms
+            - light.turn_off:
+                id: status_rgb
+                transition_length: 0s
+            - delay: 500ms
+
+  - id: set_clock_in_mode
+    mode: restart
+    then:
+      - lambda: id(attendance).select_action(true);
+
+  - id: set_clock_out_mode
+    mode: restart
+    then:
+      - lambda: id(attendance).select_action(false);
+
+  - id: set_overtime_in_mode
+    mode: restart
+    then:
+      - lambda: id(attendance).select_overtime_action(true);
+
+  - id: set_overtime_out_mode
+    mode: restart
+    then:
+      - lambda: id(attendance).select_overtime_action(false);
+
+  - id: beep_once
+    mode: restart
+    then:
+      - output.turn_on: buzzer_output
+      - delay: 150ms
+      - output.turn_off: buzzer_output
+
+  - id: beep_three_times
+    mode: restart
+    then:
+      - repeat:
+          count: 3
+          then:
+            - output.turn_on: buzzer_output
+            - delay: 100ms
+            - output.turn_off: buzzer_output
+            - delay: 100ms
+
+rc522_spi:
+  cs_pin: GPIO7
+  # GPIO10 is used by the overtime clock-out button. Connect the RC522 RST pin
+  # directly to 3.3V; ESPHome supports operating this reader without reset_pin.
+  on_tag:
+    then:
+      - lambda: |-
+          id(last_card_registered) = id(attendance).handle_tag(x);
+      - if:
+          condition:
+            lambda: return id(last_card_registered);
+          then:
+            - script.execute: beep_once
+          else:
+            - script.execute: beep_three_times
+
+binary_sensor:
+  - platform: gpio
+    id: clock_in_button
+    name: "上班按鍵 IN"
+    pin: {number: GPIO0, mode: INPUT_PULLUP, inverted: true}
+    filters: [{delayed_on: 30ms}]
+    on_press:
+      - script.execute: set_clock_in_mode
+  - platform: gpio
+    id: clock_out_button
+    name: "下班按鍵 OUT"
+    pin: {number: GPIO1, mode: INPUT_PULLUP, inverted: true}
+    filters: [{delayed_on: 30ms}]
+    on_press:
+      - script.execute: set_clock_out_mode
+  - platform: gpio
+    id: overtime_in_button
+    name: "加班上班按鍵 OT_IN"
+    pin: {number: GPIO2, mode: INPUT_PULLUP, inverted: true}
+    filters: [{delayed_on: 30ms}]
+    on_press:
+      - script.execute: set_overtime_in_mode
+  - platform: gpio
+    id: overtime_out_button
+    name: "加班下班按鍵 OT_OUT"
+    pin: {number: GPIO10, mode: INPUT_PULLUP, inverted: true}
+    filters: [{delayed_on: 30ms}]
+    on_press:
+      - script.execute: set_overtime_out_mode
+  - platform: template
+    name: "打卡鐘時間有效 TIME_VALID"
+    id: attendance_time_valid
+    entity_category: diagnostic
+    lambda: return id(attendance).time_is_valid();
+  - platform: template
+    name: "DS3231連線 RTC_CONNECTED"
+    id: attendance_rtc_connected
+    device_class: connectivity
+    entity_category: diagnostic
+    lambda: return id(attendance).hardware_rtc_is_connected();
+  - platform: template
+    name: "打卡鐘網路 ONLINE"
+    id: attendance_network_connected
+    device_class: connectivity
+    entity_category: diagnostic
+    lambda: return id(attendance).network_is_connected();
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "設備IP位址 IP_ADDRESS"
+  - platform: template
+    name: "最後校時時間 LAST_SYNC"
+    id: attendance_last_sync
+    icon: mdi:clock-check-outline
+    entity_category: diagnostic
+    update_interval: 5s
+    lambda: return {id(attendance).last_sync_time_text()};
+  - platform: template
+    name: "目前校時來源 TIME_SOURCE"
+    id: attendance_time_source
+    icon: mdi:clock-sync-outline
+    entity_category: diagnostic
+    update_interval: 5s
+    lambda: return {id(attendance).time_source_text()};
+  - platform: template
+    name: "最後刷卡資訊 LAST_CARD"
+    id: attendance_last_card
+    icon: mdi:card-account-details-outline
+    update_interval: 1s
+    lambda: return {id(attendance).last_card_info_text()};
+  - platform: template
+    name: "最後刷卡員工 LAST_CARD_EMPLOYEE"
+    id: attendance_last_card_employee
+    icon: mdi:account-clock-outline
+    update_interval: 1s
+    lambda: return {id(attendance).last_card_employee_text()};
+  - platform: template
+    name: "最後刷卡卡號 LAST_CARD_UID"
+    id: attendance_last_card_uid
+    icon: mdi:card-bulleted-outline
+    update_interval: 1s
+    lambda: return {id(attendance).last_card_uid_text()};
+  - platform: template
+    name: "最後刷卡結果 LAST_CARD_RESULT"
+    id: attendance_last_card_result
+    icon: mdi:clipboard-check-outline
+    update_interval: 1s
+    lambda: return {id(attendance).last_card_result_text()};
+
+select:
+  - platform: template
+    name: "打卡模式 ATTENDANCE_MODE"
+    id: attendance_mode_select
+    icon: mdi:briefcase-clock-outline
+    options:
+      - "上班"
+      - "下班"
+      - "加班上班"
+      - "加班下班"
+    update_interval: 1s
+    lambda: |-
+      const std::string mode = id(attendance).attendance_mode_text();
+      if (mode == "未設定")
+        return {};
+      return {mode};
+    set_action:
+      - lambda: |-
+          if (x == "上班")
+            id(attendance).select_action(true);
+          else if (x == "下班")
+            id(attendance).select_action(false);
+          else if (x == "加班上班")
+            id(attendance).select_overtime_action(true);
+          else if (x == "加班下班")
+            id(attendance).select_overtime_action(false);
+
+button:
+  - platform: template
+    name: "立即同步時間 SYNC_NOW"
+    id: attendance_sync_now
+    icon: mdi:clock-sync
+    entity_category: config
+    on_press:
+      - script.execute: fast_sntp_sync
+sensor:
+  - platform: wifi_signal
+    name: "WiFi訊號 WIFI_SIGNAL"
+    update_interval: 60s

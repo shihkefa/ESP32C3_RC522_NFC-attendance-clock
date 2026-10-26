@@ -4,12 +4,31 @@
 
 本版新增「管理員補打卡」，可補登上班、下班、加班上班與加班下班，並納入 Excel 工時與 JSON 備份。
 
+- [下載 v1.3.34 Factory BIN](./nfc-attendance-clock-firmware.factory_1334.bin?raw=true)
 - [下載 v1.3.34 原始碼 ZIP](./releases/v1.3.34/nfc-attendance-clock-esphome-v1.3.34.zip?raw=true)
 - [瀏覽 v1.3.34 完整原始檔](./firmware/v1.3.34/)
 - [ESPHome 燒錄教學：檔案放哪裡、首次 USB、後續 OTA](./docs/ESPHOME_FLASHING.md)
 - [版本更新摘要](./CHANGELOG.md) · [原版 OTA 更新說明](./firmware/v1.3.34/OTA更新說明.md) · [原版驗證紀錄](./firmware/v1.3.34/驗證說明.md)
 
-v1.3.34 提供完整原始碼，請用自己的 Wi-Fi 與管理員密碼在 ESPHome 編譯；本次不提供通用 BIN。倉庫內的 `nfc-attendance-clock-firmware.factory_1329.bin` 是歷史 v1.3.29，並非 v1.3.34。
+v1.3.34 現在提供可直接 USB 燒錄的 **公開 Factory BIN**，也保留可自行編譯的完整原始碼。首頁原有的 v1.3.29 BIN 已由本版取代。
+
+### 直接下載 BIN 燒錄
+
+**[下載 v1.3.34 Factory BIN](./nfc-attendance-clock-firmware.factory_1334.bin?raw=true)** · [公開韌體使用說明與編譯紀錄](./releases/v1.3.34/PUBLIC_FIRMWARE.md)
+
+新裝置可用 Chrome／Edge 開啟 [ESPHome Web](https://web.esphome.io/)，接上 CH340 USB，按 `Connect → Install`，選擇下載的 `nfc-attendance-clock-firmware.factory_1334.bin` 完成燒錄。這是 USB Factory 映像，不能當成 OTA 映像上傳。
+
+| 首次設定 | 公開 BIN 的預設值 |
+| --- | --- |
+| 配網熱點 | `NFC-Clock-Fallback` |
+| 熱點密碼 | `change-me-1234` |
+| 配網頁 | `http://192.168.4.1/` |
+| 管理頁帳號 | `admin` |
+| 初始管理員密碼 | `change-me-1334` |
+
+此 BIN 不內建私人 Wi-Fi 名稱或密碼。開機後連上熱點，在配網頁選擇自己的 2.4 GHz Wi-Fi；再回到同一區域網路開啟 `http://nfc-attendance-clock.local/attendance/`。**首次登入後請在管理頁修改管理員密碼。** Factory 完整安裝可能重設配網及初始密碼；只有採保留 NVS 的更新方式，才會沿用已保存的管理員密碼。
+
+已有出勤資料的裝置，先匯出完整 JSON 備份，再依[升級教學](./docs/ESPHOME_FLASHING.md#7-已有打卡鐘如何升級)處理分割表及資料；公開 BIN 從舊版安裝後可能需要重新配網。
 
 ### 透過 ESPHome 燒錄，要複製哪些檔案？
 
@@ -79,7 +98,7 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 
 依照上圖把硬體接好線後尋找合適的外殼裝入，再依照 [ESPHome 燒錄教學](./docs/ESPHOME_FLASHING.md) 編譯並安裝 v1.3.34。四按鍵版接線請以[原始碼接線說明](./firmware/v1.3.34/README.md#接線)及 YAML 為準：RC522 的 RST 接 3.3V，GPIO10 留給加班下班按鍵。
 
-歷史檔案：[v1.3.29 Factory BIN](./nfc-attendance-clock-firmware.factory_1329.bin?raw=true)。此檔僅保留舊版紀錄，不包含 v1.3.34 的補打卡功能，已使用新版補打卡的裝置請勿刷回。
+可直接使用 [v1.3.34 Factory BIN](./nfc-attendance-clock-firmware.factory_1334.bin?raw=true) 透過 USB 安裝。舊版 v1.3.29 BIN 已從目前檔案列表移除；使用補打卡後請勿降版。
 
 產品介紹說明:
 ## 四種打卡模式
@@ -120,7 +139,7 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 
 ## 第一次開機使用透過設備的 AP 模式進行WIFI配網連接
 
-若已在 `secrets.yaml` 填好正確的 Wi-Fi，開機後會直接連線。若無法連上設定的網路，等待約一分鐘，會出現名為 `NFC-Clock-Fallback` 的備用熱點。
+使用公開 BIN 的新裝置，開機後會開啟 `NFC-Clock-Fallback` 熱點供首次配網。若自行編譯並在 `secrets.yaml` 填好 Wi-Fi，則會先嘗試連線，失敗約一分鐘後才開啟備用熱點。
 
 使用者只要依照下列步驟設定：
 
@@ -137,7 +156,7 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 
 `http://nfc-attendance-clock.local/attendance/`
 
-登入帳號為 `admin`，首次密碼是自己在 `secrets.yaml` 設定的 `attendance_web_password`；若曾在管理頁修改密碼，升級後繼續使用已保存的新密碼。
+登入帳號為 `admin`。公開 BIN 的初始密碼為 `change-me-1334`，請首次登入後修改；自行編譯版使用 `secrets.yaml` 的 `attendance_web_password`。若採保留 NVS 的 OTA 更新，會繼續使用已保存的新密碼；Factory 完整安裝後可能需要使用初始密碼。
 如果部分路由器或電腦不支援 mDNS，也可以進公司的路由器管理介面找尋刷卡機取得的 IP 位址登入。
 `http://192.168.X.X/attendance/`
 
