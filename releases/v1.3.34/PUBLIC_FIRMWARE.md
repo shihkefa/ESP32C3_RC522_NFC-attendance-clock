@@ -18,13 +18,13 @@ Factory 完整安裝可能重設配網及初始密碼；採保留 NVS 的更新�
 
 ## 已有資料的裝置
 
-先在管理頁匯出完整 JSON 備份。v1.3.30 或更早版本須透過 USB 更新分割表；公開 Factory BIN 的網頁安裝流程可能清除資料，完成後需要配網並匯入 JSON 備份。保留資料的 USB 更新方式及 v1.3.31～v1.3.33 的自行編譯 OTA 流程，請看 [完整燒錄教學](../../docs/ESPHOME_FLASHING.md)。
+先在管理頁匯出完整 JSON 備份。公開 Factory BIN 用於 USB 完整安裝，可能影響資料、配網及初始密碼；完成後請確認 Wi-Fi、裝置時間與出勤資料，必要時匯入 JSON 備份。
 
-從既有含 Wi-Fi 設定的版本切換到這個公開版時，請準備透過熱點重新配網。使用補打卡後，勿降回 v1.3.33 或更早版本。
+需要無線 OTA 時，先確認裝置分割表與本版一致，並在自己的 ESPHome 環境編譯 OTA 韌體。分割表不同或無法確認時，透過 USB 寫入本版分割表。完整步驟見 [ESPHome 燒錄教學](../../docs/ESPHOME_FLASHING.md)。
 
 ## 原始碼及重建
 
-公開版使用 [nfc-attendance-clock-public.yaml](../../firmware/v1.3.34/nfc-attendance-clock-public.yaml)。相對於原版設定，只移除固定 Wi-Fi 名稱／密碼、設定公開的初始管理員密碼，並加入專案版本資訊；三個 `attendance_web` 元件檔及分割表保持原樣。
+公開版使用 [nfc-attendance-clock-public.yaml](../../firmware/v1.3.34/nfc-attendance-clock-public.yaml)。此設定透過熱點配網、使用公開的初始管理員密碼，並包含 v1.3.34 專案版本資訊；搭配同資料夾的三個 `attendance_web` 元件檔及分割表編譯。
 
 複製公開 YAML、同層的 `attendance_partitions.csv` 與 `components/attendance_web/` 資料夾即可重建，不需 `secrets.yaml`。在安裝好 ESPHome 2026.8.1 的環境、從倉庫根目錄執行：
 
@@ -32,7 +32,7 @@ Factory 完整安裝可能重設配網及初始密碼；採保留 NVS 的更新�
 esphome compile firmware/v1.3.34/nfc-attendance-clock-public.yaml
 ```
 
-若要預先填入自己的 Wi-Fi 及密碼，使用原本的 `nfc-attendance-clock.yaml` 與自己的 `secrets.yaml`，不要把個人設定上傳至公開倉庫。原始 ZIP 保留發行時內容，因此其中「不附通用 BIN」的敘述僅指原包。
+若要預先填入自己的 Wi-Fi 及密碼，使用 `nfc-attendance-clock.yaml` 與自己的 `secrets.yaml`，不要把個人設定上傳至公開倉庫。原始碼 ZIP 包含自行設定用的 YAML、密碼範例、分割表、元件與 v1.3.34 使用說明；公開 YAML 可從倉庫另行取得。
 
 ## 建置與驗證範圍
 

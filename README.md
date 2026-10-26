@@ -1,16 +1,16 @@
-# 從零開始 DIY 一台具備 Web 管理介面的 NFC 打卡鐘
+# 四按鍵 NFC 打卡鐘 v1.3.34｜ESP32-C3／RC522／ESPHome
 
-## 最新版本：四按鍵版 v1.3.34
+## v1.3.34 下載與安裝
 
-本版新增「管理員補打卡」，可補登上班、下班、加班上班與加班下班，並納入 Excel 工時與 JSON 備份。
+本版提供「管理員補打卡」，可補登上班、下班、加班上班與加班下班，並納入 Excel 工時與 JSON 備份。
 
 - [下載 v1.3.34 Factory BIN](./nfc-attendance-clock-firmware.factory_1334.bin?raw=true)
 - [下載 v1.3.34 原始碼 ZIP](./releases/v1.3.34/nfc-attendance-clock-esphome-v1.3.34.zip?raw=true)
 - [瀏覽 v1.3.34 完整原始檔](./firmware/v1.3.34/)
 - [ESPHome 燒錄教學：檔案放哪裡、首次 USB、後續 OTA](./docs/ESPHOME_FLASHING.md)
-- [版本更新摘要](./CHANGELOG.md) · [原版 OTA 更新說明](./firmware/v1.3.34/OTA更新說明.md) · [原版驗證紀錄](./firmware/v1.3.34/驗證說明.md)
+- [v1.3.34 功能摘要](./CHANGELOG.md) · [v1.3.34 OTA 安裝說明](./firmware/v1.3.34/OTA更新說明.md) · [v1.3.34 驗證紀錄](./firmware/v1.3.34/驗證說明.md)
 
-v1.3.34 現在提供可直接 USB 燒錄的 **公開 Factory BIN**，也保留可自行編譯的完整原始碼。首頁原有的 v1.3.29 BIN 已由本版取代。
+v1.3.34 提供可直接 USB 燒錄的 **公開 Factory BIN**，以及可自行編譯的完整原始碼。
 
 ### 直接下載 BIN 燒錄
 
@@ -28,7 +28,7 @@ v1.3.34 現在提供可直接 USB 燒錄的 **公開 Factory BIN**，也保留�
 
 此 BIN 不內建私人 Wi-Fi 名稱或密碼。開機後連上熱點，在配網頁選擇自己的 2.4 GHz Wi-Fi；再回到同一區域網路開啟 `http://nfc-attendance-clock.local/attendance/`。**首次登入後請在管理頁修改管理員密碼。** Factory 完整安裝可能重設配網及初始密碼；只有採保留 NVS 的更新方式，才會沿用已保存的管理員密碼。
 
-已有出勤資料的裝置，先匯出完整 JSON 備份，再依[升級教學](./docs/ESPHOME_FLASHING.md#7-已有打卡鐘如何升級)處理分割表及資料；公開 BIN 從舊版安裝後可能需要重新配網。
+已有出勤資料的裝置，先匯出完整 JSON 備份，再依[升級教學](./docs/ESPHOME_FLASHING.md#7-已有打卡鐘如何升級)處理分割表及資料；Factory 完整安裝後可能需要重新配網。
 
 ### 透過 ESPHome 燒錄，要複製哪些檔案？
 
@@ -58,7 +58,7 @@ ESPHome 設定資料夾/（Home Assistant 通常是 /config/esphome/）
 
 新裝置：複製檔案 → 填寫密碼 → 在 ESPHome 驗證、編譯 → 下載 Factory 格式韌體 → 用 [ESPHome Web](https://web.esphome.io/) 透過 USB 燒錄。詳細操作與畫面選項請看[完整燒錄教學](./docs/ESPHOME_FLASHING.md)。
 
-升級前先匯出完整 JSON 備份。v1.3.31～v1.3.33 可透過 `Install → Wirelessly` 更新；v1.3.30 或更早版本需要 USB 更新分割表。**使用補打卡後，請勿降回 v1.3.33 或更早版本**，以免舊版寫入邏輯覆寫補登後的紀錄。
+已有資料的裝置，安裝前先匯出完整 JSON 備份。確認裝置分割表與本版 `attendance_partitions.csv` 一致，且可使用 ESPHome OTA 時，可透過 `Install → Wirelessly` 安裝；分割表不同或無法確認時，使用 USB 寫入本版分割表與韌體。詳細步驟見[燒錄教學](./docs/ESPHOME_FLASHING.md#7-已有打卡鐘如何升級)。
 
 ---
 
@@ -98,7 +98,7 @@ ESP32C3跟蜂鳴器、RC522、DS3231模塊、按鈕的連接方式如下圖
 
 依照上圖把硬體接好線後尋找合適的外殼裝入，再依照 [ESPHome 燒錄教學](./docs/ESPHOME_FLASHING.md) 編譯並安裝 v1.3.34。四按鍵版接線請以[原始碼接線說明](./firmware/v1.3.34/README.md#接線)及 YAML 為準：RC522 的 RST 接 3.3V，GPIO10 留給加班下班按鍵。
 
-可直接使用 [v1.3.34 Factory BIN](./nfc-attendance-clock-firmware.factory_1334.bin?raw=true) 透過 USB 安裝。舊版 v1.3.29 BIN 已從目前檔案列表移除；使用補打卡後請勿降版。
+可直接使用 [v1.3.34 Factory BIN](./nfc-attendance-clock-firmware.factory_1334.bin?raw=true) 透過 USB 安裝。
 
 產品介紹說明:
 ## 四種打卡模式

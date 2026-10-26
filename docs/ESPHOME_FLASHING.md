@@ -12,7 +12,7 @@
 4. 安裝後連上 `NFC-Clock-Fallback` 熱點，密碼 `change-me-1234`；開啟 `http://192.168.4.1/` 設定自己的 2.4 GHz Wi-Fi。
 5. 電腦或手機回到相同區域網路，開啟 `http://nfc-attendance-clock.local/attendance/`（或裝置 IP 加 `/attendance/`），帳號 `admin`，初始密碼 `change-me-1334`。登入後在管理頁修改密碼。
 
-公開 BIN 不內建私人 Wi-Fi 資料，也不需要使用者提供 `secrets.yaml`。已有員工及刷卡資料的裝置請先匯出 JSON 備份，依第 7 節升級；Factory 完整安裝可能重設配網及初始密碼；採保留 NVS 的更新方式才會沿用已保存的管理員密碼。由舊版改裝公開 BIN 可能需要重新配網。**這個 Factory BIN 只能用於 USB 完整安裝，不能作為 OTA 映像上傳。**
+公開 BIN 不內建私人 Wi-Fi 資料，也不需要使用者提供 `secrets.yaml`。已有員工及刷卡資料的裝置請先匯出 JSON 備份，依第 7 節升級；Factory 完整安裝可能重設配網及初始密碼；採保留 NVS 的更新方式才會沿用已保存的管理員密碼。安裝後請確認 Wi-Fi 連線，必要時透過熱點重新配網。**這個 Factory BIN 只能用於 USB 完整安裝，不能作為 OTA 映像上傳。**
 
 公開 BIN 的來源設定與檢查結果見 [公開韌體說明](../releases/v1.3.34/PUBLIC_FIRMWARE.md)。以下章節保留自行編譯及既有裝置升級流程。
 
@@ -62,7 +62,7 @@
 
 第一次使用且設定資料夾沒有 `secrets.yaml`：把本包的 `secrets.example.yaml` 複製一份，改名為 `secrets.yaml`，再填入自己的資料。
 
-已經有 `secrets.yaml`：**保留原檔，只補齊缺少的項目**。從舊版升級時沿用原本 Wi-Fi 與密碼；若這份檔案還供其他裝置使用，不要把它整份覆蓋。
+已經有 `secrets.yaml`：**保留原檔，只補齊缺少的項目**。安裝時沿用自己的 Wi-Fi 與密碼；若這份檔案還供其他裝置使用，不要把它整份覆蓋。
 
 ```yaml
 wifi_ssid: "YOUR_2_4_GHZ_WIFI_NAME"
@@ -123,25 +123,27 @@ ESPHome Web 負責把編譯好的 BIN 寫入裝置，**不能直接拿 ZIP、YAM
 
 ## 7. 已有打卡鐘，如何升級？
 
-先在管理頁「資料備份與還原」下載**完整 JSON 備份**，並保存原本的 ESPHome 設定及 `secrets.yaml`。Excel 適合查閱，JSON 才是本專案的還原檔案。
+安裝 v1.3.34 前，先在管理頁「資料備份與還原」下載**完整 JSON 備份**，並保存自己的 ESPHome 設定及 `secrets.yaml`。Excel 適合查閱，JSON 才是本專案的還原檔案。
 
-| 目前版本／情況 | 升級方式 | 原因 |
-| --- | --- | --- |
-| v1.3.31、v1.3.32、v1.3.33 | ESPHome 無線 OTA | 分割表與 v1.3.34 相同 |
-| v1.3.30 或更早，或無法確認分割表 | USB 更新分割表與韌體 | 單純 OTA 不會更新分割表 |
-| 新空白裝置 | USB 首次安裝 Factory 韌體 | 建立程式及出勤資料分割區 |
+| 裝置狀況 | 安裝方式 |
+| --- | --- |
+| 分割表與本版 `attendance_partitions.csv` 一致，且 ESPHome 可進行 OTA | 自行編譯後使用無線 OTA |
+| 分割表不同、無法確認，或沒有可用的 OTA | USB 寫入本版分割表及韌體 |
+| 新空白裝置 | USB 首次安裝 Factory 韌體 |
 
-### v1.3.31～v1.3.33：無線 OTA
+OTA 不會更新 Flash 分割表。無法確認裝置分割配置時，先備份，再依 USB 安裝流程處理。
 
-1. 將第 2 節的 5 個程式檔更新到原本 ESPHome 設定資料夾，保留原本 `secrets.yaml`。若曾調整裝置名稱、接腳或連線設定，更新時也需沿用適合自己裝置的設定。
+### 無線 OTA 安裝 v1.3.34
+
+1. 將第 2 節的 5 個程式檔放入 ESPHome 設定資料夾，保留自己的 `secrets.yaml`。若曾調整裝置名稱、接腳或連線設定，也需沿用適合自己裝置的設定。
 2. 確認裝置在線，ESPHome 能連到它的 IP；驗證並編譯成功後選 `Install → Wirelessly`。
 3. 等待上傳及重新啟動，重新開啟管理頁，核對員工、刷卡紀錄、備註、時間與自動模式排程。
 
 這條路徑會使用 OTA 韌體更新程式。若另行下載檔案，**`.ota.bin` 才是 OTA 映像，`.factory.bin` 不可當成 OTA 映像上傳**；本教學優先使用 Device Builder 的無線安裝入口。
 
-### v1.3.30 或更早：USB 更新分割表
+### USB 安裝 v1.3.34 分割表與韌體
 
-完成 JSON 備份後，更新本版程式檔並保留自己的設定。將開發板以 USB 接到執行 ESPHome 的主機，在 `Install` 選擇該主機的 USB／序列埠安裝方式，讓 ESPHome 寫入本版分割表與韌體。若在電腦上使用 ESPHome 命令列，也可在設定資料夾執行：
+完成 JSON 備份後，放好本版程式檔並保留自己的設定。將開發板以 USB 接到執行 ESPHome 的主機，在 `Install` 選擇該主機的 USB／序列埠安裝方式，讓 ESPHome 寫入本版分割表與韌體。若在電腦上使用 ESPHome 命令列，也可在設定資料夾執行：
 
 ```text
 esphome run nfc-attendance-clock.yaml --device COM5
@@ -149,9 +151,9 @@ esphome run nfc-attendance-clock.yaml --device COM5
 
 `COM5` 只是 Windows 範例，請換成實際 USB 埠；Linux 可能是 `/dev/ttyUSB0`。這個命令會驗證、編譯並上傳，使用方法見 [ESPHome 官方命令列說明](https://esphome.io/guides/cli/)。
 
-升級時不要選擇「清除整顆 Flash」。本版會嘗試搬移舊版員工及備註，仍須以 JSON 備份作為復原依據，不能保證所有舊版本的資料都自動遷移。若使用會完整清除的網頁安裝流程，應視為重新安裝，完成後需要手動匯入 JSON 備份；匯入會取代裝置目前的員工、備註及紀錄。
+已有資料的裝置，不要任意選擇「清除整顆 Flash」。分割表變動或 Factory 完整安裝仍可能影響資料與配網，請以 JSON 備份作為復原依據。安裝後確認時間、Wi-Fi、管理員密碼與出勤資料；需要還原時，從管理頁匯入 JSON 備份，匯入會取代裝置目前的員工、備註及紀錄。
 
-**補打卡後請勿降回 v1.3.33 或更早版本。** v1.3.34 使用紀錄寫入序號定位下一筆；舊版不理解這個順序，可能覆寫補登後的資料。更多原版細節見 [OTA 更新說明](../firmware/v1.3.34/OTA更新說明.md)。
+更多設定與資料保留條件見 [v1.3.34 OTA 安裝說明](../firmware/v1.3.34/OTA更新說明.md)。
 
 ## 8. 常見問題
 
@@ -165,6 +167,6 @@ esphome run nfc-attendance-clock.yaml --device COM5
 | 裝置無法正常開機 | 核對 3.3V 接線及板型；GPIO2 是啟動取樣腳位，不要在通電或重啟時按住加班上班鍵。 |
 | OTA 後無法連上 Wi-Fi | 確認新韌體沿用自己的 Wi-Fi 設定，並檢查備用熱點；不要使用他人密碼編譯的 BIN。 |
 | 更新後登入密碼與檔案不同 | 若曾在網頁改過密碼，裝置會沿用已保存的密碼。 |
-| 編譯器升級後出錯 | 先核對檔案是否完整及 YAML 驗證結果，再對照原版 ESPHome 2026.8.1 編譯環境；保留錯誤紀錄以便排查。 |
+| 編譯器升級後出錯 | 先核對檔案是否完整及 YAML 驗證結果，再對照本版使用的 ESPHome 2026.8.1 編譯環境；保留錯誤紀錄以便排查。 |
 
-[返回專案首頁](../README.md) · [原版完整使用及接線說明](../firmware/v1.3.34/README.md)
+[返回專案首頁](../README.md) · [v1.3.34 完整使用及接線說明](../firmware/v1.3.34/README.md)

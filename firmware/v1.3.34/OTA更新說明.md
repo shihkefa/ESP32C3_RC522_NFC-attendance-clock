@@ -1,34 +1,30 @@
-# v1.3.34 OTA 更新說明
+# v1.3.34 OTA 安裝說明
 
-## 從 v1.3.31～v1.3.33 升級
+## 安裝前確認
 
-v1.3.34 沿用 v1.3.31～v1.3.33 的 Flash 分割區配置，因此可直接透過 ESPHome OTA 升級，不必再次以 USB 寫入分割表。
+先從管理頁匯出完整 JSON 備份，保存自己的 ESPHome 設定與 `secrets.yaml`。只有裝置目前分割表與本包 `attendance_partitions.csv` 一致，且 ESPHome 能透過網路連線進行 OTA 時，才使用以下無線安裝流程。
 
-1. 先從管理頁匯出完整 JSON 備份。
-2. 將本更新包內的 `components/attendance_web`、`nfc-attendance-clock.yaml`、`attendance_partitions.csv` 更新到原 ESPHome 設定目錄。
-3. 保留原本的 `secrets.yaml`，不要使用 `secrets.example.yaml` 覆蓋。
-4. 在 ESPHome 執行「Install → Wirelessly」；或編譯後上傳 `firmware.ota.bin`。
-5. 更新後開啟管理頁，在「系統設定 → 自動模式切換」設定上班、下班、加班上班與加班下班排程。
+OTA 不會更新 Flash 分割表。分割配置不同、無法確認或無法進行 OTA 時，改用 USB 寫入 v1.3.34 的分割表及韌體。Factory 完整安裝可能重設資料、配網與初始密碼，完成後請核對資料，必要時匯入 JSON 備份。
 
-原本 v1.3.32 的總開關、上班時間與下班時間會自動移轉。加班上班與加班下班排程預設關閉，建議時間為 `18:00` 與 `22:00`；只有在網頁勾選並保存後才會自動切換。
+## ESPHome 無線安裝
 
-## Wi-Fi 是否需要重新設定
+1. 將 `nfc-attendance-clock.yaml`、`attendance_partitions.csv` 和 `components/attendance_web/` 內的三個檔案放到 ESPHome 設定資料夾，維持相對路徑。
+2. 保留自己的 `secrets.yaml`，不要用 `secrets.example.yaml` 覆蓋；核對裝置名稱、接腳及 Wi-Fi 設定。
+3. 在 ESPHome 驗證設定並編譯成功後，執行 `Install → Wirelessly`。
+4. 等待裝置重新啟動，開啟 `http://nfc-attendance-clock.local/attendance/`，或使用裝置 IP 加 `/attendance/`。
+5. 核對員工、卡片、刷卡紀錄、備註、裝置時間與「系統設定 → 自動模式切換」排程。
+6. 在「刷卡紀錄 → 管理員補打卡」選擇員工、時間與打卡類型，輸入管理員密碼後即可補登。僅接受目前往前兩個日曆月內且不晚於裝置時間的紀錄。
 
-OTA 本身不會清除 NVS，所以透過配網 AP 保存的 Wi-Fi、網頁修改後的管理員密碼、員工、卡片、備註及刷卡紀錄都會保留。
+## Wi-Fi、密碼與資料
 
-若 Wi-Fi 只寫在 YAML／`secrets.yaml` 中，則 OTA 韌體也必須使用原本相同的 Wi-Fi 設定編譯，才可保證更新後繼續連線。請勿使用含有其他 SSID 或密碼的通用 BIN 進行 OTA。
+採保留 NVS 及出勤資料分割區的 OTA 更新方式，會沿用已保存的配網、管理員密碼與出勤資料。若 Wi-Fi 由 YAML／`secrets.yaml` 提供，編譯時也必須沿用自己的 Wi-Fi 設定。
 
-以下操作會清除 Wi-Fi，之後需要重新配網：
-
-- USB 刷入時選擇清除整顆 Flash。
-- 網頁安裝器執行完整清除後再刷入 factory BIN。
-- NVS 因故被刪除或重建。
+USB 清除整顆 Flash、Factory 完整安裝或 NVS 被重建，都可能需要重新配網並使用初始密碼登入。請以事先匯出的 JSON 備份作為資料復原依據；匯入會取代裝置目前的員工、備註及刷卡紀錄，過程中請保持供電。
 
 ## BIN 類型
 
-- `firmware.ota.bin`：用於已在運作中的打卡鐘 OTA 升級。
-- `firmware.factory.bin`：用於 USB／WebSerial 首次完整刷入，不可當作 OTA 檔案上傳。
+- `firmware.ota.bin`：ESPHome 編譯產生的 OTA 映像，適用於符合上述條件的無線安裝。
+- `firmware.factory.bin`：USB 完整安裝映像，不能當作 OTA 檔案上傳。
+- 專案提供的 `nfc-attendance-clock-firmware.factory_1334.bin` 為 v1.3.34 公開 Factory 映像，透過熱點配網，不內建私人 Wi-Fi 資料；它也不能用於 OTA。
 
-為避免把別人的 Wi-Fi 或管理員密碼編入韌體，本更新包提供完整可編譯原始檔，不附帶使用測試密碼建立的通用 OTA BIN。請在原本 ESPHome 環境中編譯，即可沿用原有 `secrets.yaml`。
-
-更新後到「刷卡紀錄 → 管理員補打卡」操作。先確認裝置時間正確，再選員工、時間與打卡類型。保存會新增紀錄並納入 Excel 工時。請勿降回 v1.3.33 或更早版本，以免舊版使用打卡時間判斷寫入位置，覆寫補登後的紀錄。
+本包提供可自行編譯的原始檔。需要 OTA 時，請在自己的 ESPHome 環境使用自己的設定編譯。詳細檔案清單見[使用說明](./README.md#安裝)，USB 與 OTA 完整操作見 [ESPHome 燒錄教學](https://github.com/shihkefa/ESP32C3_RC522_NFC-attendance-clock/blob/main/docs/ESPHOME_FLASHING.md)。
